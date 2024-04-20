@@ -1,11 +1,10 @@
 [Interface]
 Address = {{ item.ip_address }}
-ListenPort = {{ item.port }}
-PrivateKey = {{ item.private_key }}
+PrivateKey = {{ lookup('ansible.builtin.file', '/configs/wg_confs/' + item.name + '.private.key') }}
+DNS = {{ dns }}
 
 [Peer]
-PublicKey = {{ item.public_key }}
-PresharedKey = {{ item.preshared_key }}
+PublicKey = {{ item.server_public_key }}
 Endpoint = {{ item.endpoint }}
 AllowedIPs = {{ item.allowed_ips | default('0.0.0.0/8') }}
 PersistentKeepalive = {{ persistent_keepalive | default('25') }}
