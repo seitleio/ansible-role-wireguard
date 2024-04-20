@@ -1,0 +1,37 @@
+---
+# defaults file for ansible-role-wireguard
+
+# ----------------------------------- #
+# / General Settings
+# ----------------------------------- #
+timezone: "Europe/Berlin"
+service_name: wireguard
+service_data_path: "/data/services/{{ service_name }}"
+# ----------------------------------- #
+
+# ----------------------------------- #
+# / Wireguard Settings
+# ----------------------------------- #
+
+# Wireguard Server Settings
+wireguard_server_mode: False
+wireguard_server_url: ""
+wireguard_server_peers: "" # eg. iPhone, notebook
+wireguard_server_internal_subnet: "172.9.9.0/24"
+wireguard_server_allowed_ips: "0.0.0.0/8"
+wireguard_server_peerdns: "1.1.1.1"
+
+# Wireguard Client Settings (Only if wireguard_server_mode is False)
+wireguard_client_configs: []
+wireguard_client_configs_directory: "{{ service_data_path }}/config/wg_confs"
+# - name: wg-home
+#   ip_address: 172.9.9.2
+#   port: 51820
+#   private_key: ...
+#   public_key: ... # Server Public Key
+#   preshared_key: ...
+#   endpoint: vpn.example.org
+#   allowed_ips: 192.168.178.0/24
+#   persistent_keepalive: 25
+
+# ----------------------------------- #

@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+@ansible_home = "/home/vagrant/.ansible"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+
+  # Copy the Ansible playbook over to the guest machine, run rsync-auto to automatically
+  # pull in the latest changes while a VM is running.
+  config.vm.synced_folder "../", "#{@ansible_home}/roles/ansible-role-wireguard", type: 'rsync'
+
+  # The working ansible directory created by ansible_local is owned by root
+  config.vm.provision "shell", inline: "chown vagrant:vagrant #{@ansible_home}"
+  config.vm.provision "shell", inline: "sudo apt update && sudo apt upgrade -y && sudo apt-get install ca-certificates curl -y"
+  config.vm.provision "shell", inline: "sudo install -m 0755 -d /etc/apt/keyrings && sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && sudo chmod a+r /etc/apt/keyrings/docker.asc"
+  config.vm.provision "shell", inline: "echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu jammy stable' | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
+  config.vm.provision "shell", inline: "sudo apt update && sudo apt install docker-ce -y"
+
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.playbook = "test.yml"
+    ansible.verbose = "vvv"
+  end
+end

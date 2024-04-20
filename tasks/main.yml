@@ -1,0 +1,69 @@
+---
+# tasks file for ansible-role-wireguard
+- name: Make sure the Wireguard container is created and running (Server Mode)
+  community.docker.docker_container:
+    name: "{{ service_name }}"
+    image: "lscr.io/linuxserver/wireguard"
+    pull: true
+    privileged: true
+    sysctls:
+      "net.ipv4.conf.all.src_valid_mark": "1"
+    capabilities:
+      - net_admin
+      - sys_module
+    state: "started"
+    env:
+      TZ: "{{ timezone }}"
+      SERVERURL: "{{ wireguard_server_url }}"
+      PEERS: "{{ wireguard_server_peers }}"
+      INTERNAL_SUBNET: "{{ wireguard_server_internal_subnet }}"
+      ALLOWEDIPS: "{{ wireguard_server_allowed_ips }}"
+      PEERDNS: "{{ wireguard_server_peerdns }}"
+      LOG_CONFS: "true"
+    ports:
+      - "51820:51820/udp"
+    volumes:
+      - "/{{ service_data_path }}/config:/config"
+      - "/lib/modules:/lib/modules"
+    restart_policy: unless-stopped
+  when: wireguard_server_mode
+
+- name: Create wg_configs directory
+  ansible.builtin.file:
+    path: "{{ wireguard_client_configs_directory }}"
+    owner: 911
+    group: 911
+    mode: "0640"
+    recurse: true
+    state: directory
+  when: not wireguard_server_mode
+
+- name: Copy client config files to the remote host
+  ansible.builtin.template:
+    src: wg0.conf.j2
+    dest: "{{ wireguard_client_configs_directory }}/{{ item.name }}.conf"
+    owner: 911
+    group: 911
+    mode: "0640"
+  loop: "{{ wireguard_client_configs }}"
+  when: not wireguard_server_mode
+
+- name: Make sure the Wireguard container is created and running (Client Mode)
+  community.docker.docker_container:
+    name: "{{ service_name }}"
+    image: "lscr.io/linuxserver/wireguard"
+    pull: true
+    privileged: true
+    sysctls:
+      "net.ipv4.conf.all.src_valid_mark": "1"
+    capabilities:
+      - net_admin
+      - sys_module
+    state: "started"
+    env:
+      TZ: "{{ timezone }}"
+    volumes:
+      - "{{ service_data_path }}/config:/config"
+      - "/lib/modules:/lib/modules"
+    restart_policy: unless-stopped
+  when: not wireguard_server_mode

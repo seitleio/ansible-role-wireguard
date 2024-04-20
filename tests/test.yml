@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+  - name: Install requirements for Docker Ansible module
+    ansible.builtin.apt:
+      pkg:
+      - python3-full
+      - python3-pip
+      - python3-docker
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  roles:
+    - ansible-role-wireguard

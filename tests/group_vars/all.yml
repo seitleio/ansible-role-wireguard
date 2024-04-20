@@ -1,0 +1,10 @@
+wireguard_client_configs: 
+  - name: wg-home
+    ip_address: 172.9.9.2
+    port: 51820
+    private_key: abc
+    public_key: abc # Server Public Key
+    preshared_key: abc
+    endpoint: vpn.example.org
+    allowed_ips: 192.168.178.0/24
+    persistent_keepalive: 25
