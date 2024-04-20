@@ -1,6 +1,6 @@
 [Interface]
 Address = {{ item.ip_address }}
-PrivateKey = {{ lookup('ansible.builtin.file', '/configs/wg_confs/' + item.name + '.private.key') }}
+PrivateKey = {{ lookup('ansible.builtin.file', '/config/wg_confs/' + item.name + '.private.key') }}
 DNS = {{ dns }}
 
 [Peer]
