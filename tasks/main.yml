@@ -76,5 +76,5 @@
   when: not wireguard_server_mode
 
 - name: Restart docker container
-  ansible.built.command: "docker restart {{ service_name }}"
+  ansible.builtin.command: "docker restart {{ service_name }}"
   when: not wireguard_server_mode
