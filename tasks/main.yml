@@ -48,13 +48,6 @@
     restart_policy: unless-stopped
   when: not wireguard_server_mode
 
-- name: Generate keys
-  community.docker.docker_container_exec:
-    container: "{{ service_name }}"
-    command: "sh -c 'wg genkey | tee {{ item.name }}.private.key | wg pubkey > {{ item.name }}.public.key'"
-    chdir: /config/wg_confs/
-  loop: "{{ wireguard_client_configs }}"
-
 - name: Create wg_configs directory
   ansible.builtin.file:
     path: "{{ wireguard_client_configs_directory }}"
@@ -65,16 +58,6 @@
     state: directory  
   when: not wireguard_server_mode
 
-- name: Copy client config files to the remote host
-  ansible.builtin.template:
-    src: wg0.conf.j2
-    dest: "{{ wireguard_client_configs_directory }}/{{ item.name }}.conf"
-    owner: 911
-    group: 911
-    mode: "0640"
+- ansible.builtin.include_tasks: create_confs.yml
   loop: "{{ wireguard_client_configs }}"
-  when: not wireguard_server_mode
-
-- name: Restart docker container
-  ansible.builtin.command: "docker restart {{ service_name }}"
   when: not wireguard_server_mode
