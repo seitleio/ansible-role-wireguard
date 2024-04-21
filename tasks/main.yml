@@ -1,9 +1,20 @@
 ---
 # tasks file for ansible-role-wireguard
+- name: Create a wireguard network
+  community.docker.docker_network:
+    name: "{{ service_name }}_network"
+    ipam_driver: default
+    driver_options:
+      com.docker.network.bridge.name: br-wireguard
+    ipam_config:
+      - gateway: "{{ wireguard_network_gateway_ip }}"
+        subnet: "{{ wireguard_network_subnet }}"
+
 - name: Make sure the Wireguard container is created and running (Server Mode)
   community.docker.docker_container:
     name: "{{ service_name }}"
     image: "lscr.io/linuxserver/wireguard"
+    restart: true
     pull: true
     privileged: true
     sysctls:
@@ -20,6 +31,9 @@
       ALLOWEDIPS: "{{ wireguard_server_allowed_ips }}"
       PEERDNS: "{{ wireguard_server_peerdns }}"
       LOG_CONFS: "true"
+    networks:
+      - name: "{{ service_name }}_network"
+        ipv4_address: "{{ wireguard_container_ip }}"
     ports:
       - "51820:51820/udp"
     volumes:
@@ -27,26 +41,6 @@
       - "/lib/modules:/lib/modules"
     restart_policy: unless-stopped
   when: wireguard_server_mode
-
-- name: Make sure the Wireguard container is created and running (Client Mode)
-  community.docker.docker_container:
-    name: "{{ service_name }}"
-    image: "lscr.io/linuxserver/wireguard"
-    pull: true
-    privileged: true
-    sysctls:
-      "net.ipv4.conf.all.src_valid_mark": "1"
-    capabilities:
-      - net_admin
-      - sys_module
-    state: "started"
-    env:
-      TZ: "{{ timezone }}"
-    volumes:
-      - "{{ service_data_path }}/config:/config"
-      - "/lib/modules:/lib/modules"
-    restart_policy: unless-stopped
-  when: not wireguard_server_mode
 
 - name: Create wg_configs directory
   ansible.builtin.file:
@@ -58,6 +52,34 @@
     state: directory  
   when: not wireguard_server_mode
 
+- name: Make sure the Wireguard container is created and running (Client Mode)
+  community.docker.docker_container:
+    name: "{{ service_name }}"
+    image: "lscr.io/linuxserver/wireguard"
+    restart: true
+    pull: true
+    privileged: true
+    sysctls:
+      "net.ipv4.conf.all.src_valid_mark": "1"
+    capabilities:
+      - net_admin
+      - sys_module
+    network_mode: bridge
+    state: "started"
+    env:
+      TZ: "{{ timezone }}"
+    networks:
+      - name: "{{ service_name }}_network"
+        ipv4_address: "{{ wireguard_container_ip }}"
+    volumes:
+      - "{{ service_data_path }}/config:/config"
+      - "/lib/modules:/lib/modules"
+    restart_policy: unless-stopped
+  when: not wireguard_server_mode
+
 - ansible.builtin.include_tasks: create_confs.yml
   loop: "{{ wireguard_client_configs }}"
   when: not wireguard_server_mode
+
+- ansible.builtin.include_tasks: add_routes_service.yml
+  when: wireguard_client_route_subnets | length > 0

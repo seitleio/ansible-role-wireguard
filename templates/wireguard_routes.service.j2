@@ -1,0 +1,14 @@
+[Unit]
+Description=Add routes to route traffic through Wireguard
+After=docker.service
+
+[Service]
+Type=oneshot
+Restart=on-failure
+{% for subnet in wireguard_client_route_subnets %}
+ExecStart=ip route add {{ subnet }} via {{ wireguard_container_ip }}
+ExecStop=ip route del {{ subnet }}
+{% endfor %}
+
+[Install]
+WantedBy=multi-user.target

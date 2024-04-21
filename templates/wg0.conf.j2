@@ -1,10 +1,14 @@
 [Interface]
 Address = {{ item.ip_address }}
 PrivateKey = {{ private_key.content | b64decode }}
-DNS = {{ dns | default('1.1.1.1') }}
+DNS = {{ item.dns | default('1.1.1.1') }}
+{% if wireguard_client_nat_host %}
+PostUp = iptables -t nat -A POSTROUTING -o wg+ -j MASQUERADE
+PreDown = iptables -t nat -D POSTROUTING -o wg+ -j MASQUERADE
+{% endif %}
 
 [Peer]
 PublicKey = {{ item.server_public_key }}
-Endpoint = {{ item.endpoint }}
+Endpoint = {{ item.endpoint }}:{{ item.port }}
 AllowedIPs = {{ item.allowed_ips | default('0.0.0.0/8') }}
 PersistentKeepalive = {{ persistent_keepalive | default('25') }}

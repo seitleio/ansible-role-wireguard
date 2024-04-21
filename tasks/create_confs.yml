@@ -1,9 +1,8 @@
 ---
 - name: Generate keys
-  community.docker.docker_container_exec:
-    container: "{{ service_name }}"
-    command: "sh -c 'wg genkey | tee {{ item.name }}.private.key | wg pubkey > {{ item.name }}.public.key'"
-    chdir: /config/wg_confs/
+  ansible.builtin.command:
+    cmd: "docker exec {{ service_name }} sh -c 'wg genkey | tee /config/wg_confs/{{ item.name }}.private.key | wg pubkey > /config/wg_confs/{{ item.name }}.public.key'"
+    creates: "{{ wireguard_client_configs_directory }}/{{ item.name }}.private.key"
 
 - name: Slurp the private key from the remote host
   ansible.builtin.slurp:
