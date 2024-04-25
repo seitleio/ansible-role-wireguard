@@ -6,10 +6,4 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Enable wireguard_routes.service
-  ansible.builtin.service:
-    name: wireguard_routes
-    daemon_reload: true
-    enabled: true
-    state: started
+  notify: Enable wireguard_routes.service

@@ -2,3 +2,10 @@
 # handlers file for ansible-role-wireguard
 - name: Restart wireguard container
   ansible.builtin.command: "docker restart {{ service_name }}"
+
+- name: Enable wireguard_routes.service
+  ansible.builtin.service:
+    name: wireguard_routes
+    daemon_reload: true
+    enabled: true
+    state: started
