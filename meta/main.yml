@@ -1,4 +1,6 @@
 galaxy_info:
+  role_name: wireguard
+  namespace: seitleio
   author: Johannes Seitle
   description: Creates a wireguard container
   company: seitle.io
