@@ -2,13 +2,21 @@
 Address = {{ item.ip_address }}
 PrivateKey = {{ private_key.content | b64decode }}
 DNS = {{ item.dns | default('1.1.1.1') }}
+
 {% if wireguard_client_nat_host %}
 PostUp = iptables -t nat -A POSTROUTING -o wg+ -j MASQUERADE
 PreDown = iptables -t nat -D POSTROUTING -o wg+ -j MASQUERADE
+{% endif %}
+
+{% if item.host_port_forwarding | length > 0 %}
+{% for port in item.host_port_forwarding %}
+PostUp = iptables -t nat -A PREROUTING -p tcp -i {{ item.name }} --dport {{ port }} -j DNAT --to-destination {{ wireguard_network_gateway_ip }}:{{ port }}
+PostDown = iptables -t nat -D PREROUTING -p tcp -i {{ item.name }} --dport {{ port }} -j DNAT --to-destination {{ wireguard_network_gateway_ip }}:{{ port }}
+{% endfor %}
 {% endif %}
 
 [Peer]
 PublicKey = {{ item.server_public_key }}
 Endpoint = {{ item.endpoint }}:{{ item.port }}
 AllowedIPs = {{ item.allowed_ips | default('0.0.0.0/8') }}
-PersistentKeepalive = {{ persistent_keepalive | default('25') }}
+PersistentKeepalive = {{ item.persistent_keepalive | default('25') }}

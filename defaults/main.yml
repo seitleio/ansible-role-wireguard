@@ -21,7 +21,7 @@ wireguard_container_ip: "{{ wireguard_network_prefix }}.2"
 # Wireguard Server Settings
 wireguard_server_mode: false
 wireguard_server_url: ""
-wireguard_server_peers: "" # eg. iPhone, notebook
+wireguard_server_peers: "" # eg. iPhone, notebook - Will automatically create peer configuration
 wireguard_server_internal_subnet: "172.9.9.0/24"
 wireguard_server_allowed_ips: "0.0.0.0/8"
 wireguard_server_peerdns: "1.1.1.1"
@@ -39,6 +39,7 @@ wireguard_client_configs: []
 #   server_public_key: ...
 #   endpoint: vpn.example.org
 #   allowed_ips: 192.168.178.0/24
+#   host_port_forwarding: [80,443,22]
 #   persistent_keepalive: 25
 
 # ----------------------------------- #
