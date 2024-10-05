@@ -2,7 +2,7 @@ Ansible Role: wireguard
 =========
 [![Ansible Lint](https://github.com/seitleio/ansible-role-wireguard/actions/workflows/ansible-lint.yaml/badge.svg)](https://github.com/seitleio/ansible-role-wireguard/actions/workflows/ansible-lint.yaml)
 
-This role creates a [Wireguard](https://hub.docker.com/r/linuxserver/wireguard). The container can be configured as server or client using the ansible variables.
+This role creates a [Wireguard](https://hub.docker.com/r/linuxserver/wireguard) container. The container can be configured as a server or a client using ansible variables.
 
 Requirements
 ------------
