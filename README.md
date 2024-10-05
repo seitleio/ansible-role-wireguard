@@ -21,33 +21,34 @@ Role Variables
 | ---------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------ | ---- |
 | service_name                       | Used for the docker container name and the data path. | "wireguard"                                                              |      |
 | service_data_location              | All data created by this service will be stored here. | "/data/services/{{ service_name }}"                                      |      |
-| wireguard_network_prefix           |  Network prefix for the Wireguard docker network. | "172.0.20"                                                               |      |
-| wireguard_network_gateway_ip       |  The host IP of the gateway (the docker host).                                     | "{{ wireguard_network_prefix }}.1"                                       |      |
-| wireguard_network_subnet           |                                                       | "{{ wireguard_network_prefix }}.0/24"                                    |      |
-| wireguard_container_ip             |                                                       | "{{ wireguard_network_prefix }}.2"                                       |      |
-| wireguard_server_mode              |                                                       | false                                                                    |      |
-| wireguard_server_url               |                                                       | ""                                                                       |      |
-| wireguard_server_peers             |                                                       | "" # eg. iPhone, notebook - Will automatically create peer configuration |      |
-| wireguard_server_internal_subnet   |                                                       | "172.9.9.0/24"                                                           |      |
-| wireguard_server_allowed_ips       |                                                       | "0.0.0.0/8"                                                              |      |
-| wireguard_server_peerdns           |                                                       | "1.1.1.1"                                                                |      |
-| wireguard_client_route_subnets     |                                                       | [] # Adds routes to the host using a systemd unit                        |      |
-| wireguard_client_configs_directory |                                                       | "{{ service_data_path }}/config/wg_confs"                                |      |
-| wireguard_client_nat_host          |                                                       | false                                                                    |      |
-| wireguard_client_configs           |                                                       | []                                                                       |      |
+| wireguard_network_prefix           | Network prefix for the Wireguard docker network. | "172.0.20"                                                               |      |
+| wireguard_network_gateway_ip       | The host IP of the gateway (the docker host).                                     | "{{ wireguard_network_prefix }}.1"                                       |      |
+| wireguard_network_subnet           | Wireguard network subnet IP adresses.  | "{{ wireguard_network_prefix }}.0/24"                                    |      |
+| wireguard_container_ip             | Host IP of the Wireguard container. | "{{ wireguard_network_prefix }}.2"                                       |      |
+| wireguard_server_mode              | Decide if the container should accept client connections. | false                                                                    |      |
+| wireguard_server_url               | The external address of the wireguard server. | ""                                                                       |      |
+| wireguard_server_peers             | When the container is used as server, this can  | "" # eg. iPhone, notebook - Will automatically create peer configuration |      |
+| wireguard_server_internal_subnet   | Subnet used by the wireguard container.| "172.9.9.0/24"                                                           |      |
+| wireguard_server_allowed_ips       | Client allowed IPs. | "0.0.0.0/8"                                                              |      |
+| wireguard_server_peerdns           | DNS server used by connected clients. | "1.1.1.1"                                                                |      |
+| wireguard_client_route_subnets     | Adds routes to the host using a systemd unit | []                        |      |
+| wireguard_client_configs_directory | Path to the wireguard configuration files. | "{{ service_data_path }}/config/wg_confs"                                |      |
+| wireguard_client_nat_host          |  | false                                                                    |      |
+| wireguard_client_configs           | Control were the container should connect to. See [Example: wireguard_client_configs](#example-wireguard_client_configs) | []                                                                       |      |
 
-
-
-# - name: wg-home
-#   ip_address: 172.9.9.2
-#   dns: 1.1.1.1
-#   port: 51820
-#   client_private_key: ...
-#   server_public_key: ...
-#   endpoint: vpn.example.org
-#   allowed_ips: 192.168.178.0/24
-#   host_port_forwarding: [80,443,22]
-#   persistent_keepalive: 25
+### Example: wireguard_client_configs
+```yaml
+- name: wg-home
+  ip_address: 172.9.9.2
+  dns: 1.1.1.1
+  port: 51820
+  client_private_key: ...
+  server_public_key: ...
+  endpoint: vpn.example.org
+  allowed_ips: 192.168.178.0/24
+  host_port_forwarding: [80,443,22]
+  persistent_keepalive: 25
+```
 
 Dependencies
 ------------
