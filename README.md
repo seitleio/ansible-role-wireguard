@@ -1,38 +1,92 @@
-Role Name
+Ansible Role: wireguard
 =========
+[![Ansible Lint](https://github.com/seitleio/ansible-role-wireguard/actions/workflows/ansible-lint.yaml/badge.svg)](https://github.com/seitleio/ansible-role-wireguard/actions/workflows/ansible-lint.yaml)
 
-A brief description of the role goes here.
+This role creates a [Wireguard](https://hub.docker.com/r/linuxserver/wireguard). The container can be configured as server or client using the ansible variables.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+As a prerequisite Python 3, Python Pip and Python docker module are required on the target host. You can install the packages manually or via ansible (see [Example Playbook](#example-playbook)).
+
+```bash
+# Manually install the packages with apt
+apt install python3-full python3-pip python3-docker
+```
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| name                               | purpose                                               | default value                                                            | note |
+| ---------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------ | ---- |
+| service_name                       | Used for the docker container name and the data path. | "wireguard"                                                              |      |
+| service_data_location              | All data created by this service will be stored here. | "/data/services/{{ service_name }}"                                      |      |
+| wireguard_network_prefix           |  Network prefix for the Wireguard docker network. | "172.0.20"                                                               |      |
+| wireguard_network_gateway_ip       |  The host IP of the gateway (the docker host).                                     | "{{ wireguard_network_prefix }}.1"                                       |      |
+| wireguard_network_subnet           |                                                       | "{{ wireguard_network_prefix }}.0/24"                                    |      |
+| wireguard_container_ip             |                                                       | "{{ wireguard_network_prefix }}.2"                                       |      |
+| wireguard_server_mode              |                                                       | false                                                                    |      |
+| wireguard_server_url               |                                                       | ""                                                                       |      |
+| wireguard_server_peers             |                                                       | "" # eg. iPhone, notebook - Will automatically create peer configuration |      |
+| wireguard_server_internal_subnet   |                                                       | "172.9.9.0/24"                                                           |      |
+| wireguard_server_allowed_ips       |                                                       | "0.0.0.0/8"                                                              |      |
+| wireguard_server_peerdns           |                                                       | "1.1.1.1"                                                                |      |
+| wireguard_client_route_subnets     |                                                       | [] # Adds routes to the host using a systemd unit                        |      |
+| wireguard_client_configs_directory |                                                       | "{{ service_data_path }}/config/wg_confs"                                |      |
+| wireguard_client_nat_host          |                                                       | false                                                                    |      |
+| wireguard_client_configs           |                                                       | []                                                                       |      |
+
+
+
+# - name: wg-home
+#   ip_address: 172.9.9.2
+#   dns: 1.1.1.1
+#   port: 51820
+#   client_private_key: ...
+#   server_public_key: ...
+#   endpoint: vpn.example.org
+#   allowed_ips: 192.168.178.0/24
+#   host_port_forwarding: [80,443,22]
+#   persistent_keepalive: 25
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+* https://github.com/geerlingguy/ansible-role-docker
 
 Example Playbook
 ----------------
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- name: Run wireguard on wireguard_hosts
+  hosts: wireguard_hosts
+  gather_facts: true
+  tags:
+    - setup_wireguard
+  pre_tasks:
+  - name: Install requirements for Docker Ansible module
+    ansible.builtin.apt:
+      pkg:
+      - python3-full
+      - python3-pip
+      - python3-docker
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  roles:
+    - role: ansible-role-wireguard
+```
 
 License
 -------
-
-BSD
+MIT
 
 Author Information
 ------------------
+Johannes Seitle <<johannes@seitle.io>>
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+<br/><br/><hr/>
+<p align="center" style="font-size:24px">
+<img src="https://avatars.githubusercontent.com/u/102231325?s=400&u=0c500c28b968020e0c306478e55779ed7a872a98&v=4" width="128"/><br/>
+seitle.io
+<p/>
