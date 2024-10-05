@@ -1,9 +1,4 @@
 ---
-- name: Remove existing routes
-  ansible.builtin.command: "ip route del {{ item }}"
-  loop: "{{ wireguard_client_route_subnets }}"
-  ignore_errors: true
-
 - name: Copy wireguard_routes.service file to remote host
   ansible.builtin.template:
     src: wireguard_routes.service.j2

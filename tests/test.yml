@@ -1,5 +1,6 @@
 ---
 - hosts: all
+  name: Role Tests
   become: true
   pre_tasks:
   - name: Install requirements for Docker Ansible module

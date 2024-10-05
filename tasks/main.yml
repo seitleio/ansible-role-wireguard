@@ -77,9 +77,16 @@
     restart_policy: unless-stopped
   when: not wireguard_server_mode
 
-- ansible.builtin.include_tasks: create_confs.yml
+- name: Create wireguard config files
+  ansible.builtin.include_tasks: create_confs.yml
   loop: "{{ wireguard_client_configs }}"
   when: not wireguard_server_mode
 
-- ansible.builtin.include_tasks: add_routes_service.yml
+- name: Remove already existing routes
+  ansible.builtin.include_tasks: remove_existing_routes.yml
+  loop: "{{ wireguard_client_route_subnets }}"
+  when: wireguard_client_route_subnets | length > 0
+
+- name: Create service to register routes and startup
+  ansible.builtin.include_tasks: add_routes_service.yml
   when: wireguard_client_route_subnets | length > 0
