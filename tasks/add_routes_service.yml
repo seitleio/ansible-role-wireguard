@@ -7,3 +7,10 @@
     group: root
     mode: "0644"
   notify: Enable wireguard_routes.service
+  register: _result
+
+- name: Restart service when file is not changed
+  ansible.builtin.service:
+    name: wireguard_routes
+    state: restarted
+  when: _result is not changed
