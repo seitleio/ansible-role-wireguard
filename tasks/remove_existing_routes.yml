@@ -1,9 +1,11 @@
 ---
 - name: Check if route already exists
   ansible.builtin.command: "ip route list exact {{ item }}"
-  register: result
+  register: _route
+  changed_when: "_route.rc == 0"
 
 - name: Remove existing routes
   ansible.builtin.command: "ip route del {{ item }}"
-  ignore_errors: true
-  when: result.stdout | length > 0
+  register: _del
+  when: _route.stdout | length > 0
+  changed_when: "_del.rc == 0"
